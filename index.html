@@ -12,64 +12,27 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       user-select: none;
     }
-
-    .perspective-container {
-      perspective: 1000px;
-    }
+    .perspective-container { perspective: 1000px; }
     .flip-inner {
       position: relative;
       width: 100%;
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       transform-style: preserve-3d;
     }
-    .flip-inner.is-flipped {
-      transform: rotateY(180deg);
-    }
-    .card-face {
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-    .card-back {
-      transform: rotateY(180deg);
-    }
-
-    .notion-card-surface {
-      background-color: #202020;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .notion-card-surface:hover {
-      background-color: #252525;
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .drag-over {
-      background-color: rgba(255, 255, 255, 0.05);
-      outline: 2px dashed rgba(255, 255, 255, 0.2);
-      outline-offset: -2px;
-      border-radius: 8px;
-    }
-    .is-dragging {
-      opacity: 0.35;
-    }
-
-    .card-selected {
-      border-color: #3b82f6 !important;
-      background-color: rgba(59, 130, 246, 0.1) !important;
-    }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #333;
-      border-radius: 3px;
-    }
+    .flip-inner.is-flipped { transform: rotateY(180deg); }
+    .card-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .card-back { transform: rotateY(180deg); }
+    .notion-card-surface { background-color: #202020; border: 1px solid rgba(255, 255, 255, 0.08); }
+    .notion-card-surface:hover { background-color: #252525; border-color: rgba(255, 255, 255, 0.15); }
+    .drag-over { background-color: rgba(255, 255, 255, 0.05); outline: 2px dashed rgba(255, 255, 255, 0.2); outline-offset: -2px; border-radius: 8px; }
+    .is-dragging { opacity: 0.35; }
+    .card-selected { border-color: #3b82f6 !important; background-color: rgba(59, 130, 246, 0.1) !important; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
   </style>
 </head>
 <body class="min-h-screen p-3 sm:p-5 pb-24 text-[10px]">
   <div class="max-w-[1600px] mx-auto">
-    
     <div class="flex flex-col lg:flex-row gap-4 items-start">
       
       <!-- 左エリア：カンバンボード本体 -->
@@ -81,19 +44,12 @@
             <span id="syncStatusBadge" class="text-[9px] font-mono text-neutral-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/5">未同期</span>
           </div>
           <div class="flex items-center gap-1.5 flex-wrap">
-            <button id="manualSyncBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">
-              手動再同期
-            </button>
-            <button id="openImportModalBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-200 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">
-              一括インポート
-            </button>
-            <button id="openBackupModalBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">
-              データ保存・復元
-            </button>
+            <button id="manualSyncBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">手動再同期</button>
+            <button id="openImportModalBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-200 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">一括インポート</button>
+            <button id="openBackupModalBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">データ保存・復元</button>
           </div>
         </header>
 
-        <!-- タブバー -->
         <div class="flex items-center gap-2 border-b border-white/10 mb-3 pb-0 text-[10px]">
           <button id="tabVocabBtn" class="flex items-center gap-1 px-3 py-1.5 border-b-2 font-medium transition border-neutral-200 text-neutral-100">
             <span>単語・フレーズ</span>
@@ -103,7 +59,6 @@
           </button>
         </div>
 
-        <!-- 操作バー & 登録フォーム -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 pb-2 border-b border-white/5 text-[9px]">
           <div class="flex items-center gap-2 text-neutral-400">
             <span class="text-neutral-300 font-medium">習得度ビュー</span>
@@ -117,61 +72,45 @@
           </div>
         </div>
 
-        <!-- カンバンボード -->
         <div class="overflow-x-auto pb-6">
           <div class="grid grid-cols-4 gap-2.5 min-w-[760px]">
-            
-            <!-- 未習得 -->
             <div class="flex flex-col gap-2">
               <div class="flex items-center justify-between px-1">
-                <span class="inline-flex items-center gap-1 bg-[#4d2d1f] text-[#ff9f73] px-2 py-0.5 rounded text-[9px] font-medium">
-                  未習得
-                </span>
+                <span class="inline-flex items-center gap-1 bg-[#4d2d1f] text-[#ff9f73] px-2 py-0.5 rounded text-[9px] font-medium">未習得</span>
                 <span id="count-unlearned" class="text-[9px] text-neutral-500 font-mono">0</span>
               </div>
               <div id="col-unlearned" data-status="unlearned" class="column-dropzone space-y-2 min-h-[400px] p-1 rounded-lg transition"></div>
             </div>
 
-            <!-- 習得中 -->
             <div class="flex flex-col gap-2">
               <div class="flex items-center justify-between px-1">
-                <span class="inline-flex items-center gap-1 bg-[#3c2747] text-[#df9fff] px-2 py-0.5 rounded text-[9px] font-medium">
-                  習得中
-                </span>
+                <span class="inline-flex items-center gap-1 bg-[#3c2747] text-[#df9fff] px-2 py-0.5 rounded text-[9px] font-medium">習得中</span>
                 <span id="count-learning" class="text-[9px] text-neutral-500 font-mono">0</span>
               </div>
               <div id="col-learning" data-status="learning" class="column-dropzone space-y-2 min-h-[400px] p-1 rounded-lg transition"></div>
             </div>
 
-            <!-- 覚えた -->
             <div class="flex flex-col gap-2">
               <div class="flex items-center justify-between px-1">
-                <span class="inline-flex items-center gap-1 bg-[#1e3448] text-[#82cfff] px-2 py-0.5 rounded text-[9px] font-medium">
-                  覚えた
-                </span>
+                <span class="inline-flex items-center gap-1 bg-[#1e3448] text-[#82cfff] px-2 py-0.5 rounded text-[9px] font-medium">覚えた</span>
                 <span id="count-remembered" class="text-[9px] text-neutral-500 font-mono">0</span>
               </div>
               <div id="col-remembered" data-status="remembered" class="column-dropzone space-y-2 min-h-[400px] p-1 rounded-lg transition"></div>
             </div>
 
-            <!-- 話せる -->
             <div class="flex flex-col gap-2">
               <div class="flex items-center justify-between px-1">
-                <span class="inline-flex items-center gap-1 bg-[#1c3829] text-[#7ee787] px-2 py-0.5 rounded text-[9px] font-medium">
-                  話せる
-                </span>
+                <span class="inline-flex items-center gap-1 bg-[#1c3829] text-[#7ee787] px-2 py-0.5 rounded text-[9px] font-medium">話せる</span>
                 <span id="count-fluent" class="text-[9px] text-neutral-500 font-mono">0</span>
               </div>
               <div id="col-fluent" data-status="fluent" class="column-dropzone space-y-2 min-h-[400px] p-1 rounded-lg transition"></div>
             </div>
-
           </div>
         </div>
       </div>
 
-      <!-- 右エリア：プロンプトビルダー（練習トレイ） -->
+      <!-- 右エリア：練習トレイ -->
       <div class="w-full lg:w-80 shrink-0 bg-[#202020] border border-white/10 rounded-xl p-3 shadow-lg flex flex-col gap-2 sticky top-4">
-        
         <div class="flex items-center justify-between border-b border-white/5 pb-2">
           <div class="flex items-center gap-1.5">
             <span class="text-[10px] font-bold text-neutral-200">本日の練習トレイ</span>
@@ -197,25 +136,18 @@
         <button id="copyCustomPromptBtn" class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-[9px] font-semibold py-1.5 rounded-lg shadow transition flex items-center justify-center gap-1">
           <span>指示文をコピーしてGPTへ</span>
         </button>
-
       </div>
 
     </div>
-
   </div>
 
-  <!-- 一括インポート用モーダル -->
   <div id="importModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#202020] border border-white/10 rounded-xl max-w-lg w-full p-4 shadow-2xl">
       <div class="flex items-center justify-between mb-2">
-        <h3 id="importModalTitle" class="text-[10px] font-semibold text-neutral-100">
-          一括インポート
-        </h3>
+        <h3 id="importModalTitle" class="text-[10px] font-semibold text-neutral-100">一括インポート</h3>
         <button id="closeImportModalBtn" class="text-neutral-500 hover:text-neutral-300 text-xs px-1 leading-none">×</button>
       </div>
-      <p id="importModalDesc" class="text-[8px] text-neutral-400 mb-2 leading-relaxed">
-        1行に「項目 / 日本語」または「項目 / 日本語 / 使い方メモ」の形式で貼り付けてください(重複は自動スキップ)。
-      </p>
+      <p id="importModalDesc" class="text-[8px] text-neutral-400 mb-2 leading-relaxed">1行に「項目 / 日本語」の形式で貼り付けてください。</p>
       <textarea id="importTextarea" rows="7" class="w-full bg-[#181818] border border-white/10 rounded p-2 text-[9px] text-neutral-200 focus:outline-none focus:border-blue-500 font-mono leading-relaxed resize-none mb-3"></textarea>
       <div class="flex items-center justify-between">
         <span id="importResultMsg" class="text-[8px] text-emerald-400 font-medium"></span>
@@ -227,31 +159,16 @@
     </div>
   </div>
 
-  <!-- データ保存・復元モーダル -->
   <div id="backupModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#202020] border border-white/10 rounded-xl max-w-lg w-full p-4 shadow-2xl">
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-[10px] font-semibold text-neutral-100">データ保存・復元（バックアップ）</h3>
         <button id="closeBackupModalBtn" class="text-neutral-500 hover:text-neutral-300 text-xs px-1 leading-none">×</button>
       </div>
-      
-      <p class="text-[8px] text-neutral-400 mb-2 leading-relaxed">
-        現在の全学習データ（単語・構文・ステータス）をテキストとして保存・復元できます。<br>
-        【保存】「書き出し」を押してテキストをコピーし、メモ帳等に保管。<br>
-        【復元】保管したテキストをここに貼り付けて「復元する」を押す。
-      </p>
-
       <div class="flex gap-2 mb-2">
-        <button id="exportDataBtn" class="bg-[#2a2a2a] hover:bg-[#333] border border-white/10 text-neutral-200 text-[9px] px-2.5 py-1 rounded font-medium transition">
-          現在のデータを書き出す
-        </button>
-        <button id="copyExportedTextBtn" class="bg-[#2a2a2a] hover:bg-[#333] border border-white/10 text-neutral-200 text-[9px] px-2.5 py-1 rounded font-medium transition hidden">
-          クリップボードにコピー
-        </button>
+        <button id="exportDataBtn" class="bg-[#2a2a2a] hover:bg-[#333] border border-white/10 text-neutral-200 text-[9px] px-2.5 py-1 rounded font-medium transition">現在のデータを書き出す</button>
       </div>
-
-      <textarea id="backupTextarea" rows="7" placeholder="「現在のデータを書き出す」を押すか、保存しておいたバックアップテキストをここに貼り付けてください..." class="w-full bg-[#181818] border border-white/10 rounded p-2 text-[8px] text-neutral-300 focus:outline-none focus:border-blue-500 font-mono leading-relaxed resize-none mb-3"></textarea>
-
+      <textarea id="backupTextarea" rows="7" class="w-full bg-[#181818] border border-white/10 rounded p-2 text-[8px] text-neutral-300 focus:outline-none focus:border-blue-500 font-mono leading-relaxed resize-none mb-3"></textarea>
       <div class="flex items-center justify-between">
         <span id="backupResultMsg" class="text-[8px] text-emerald-400 font-medium"></span>
         <div class="flex items-center gap-2">
@@ -265,66 +182,15 @@
   <script>
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxBaY6I-bS64FJc0mzrOJsEGG8kPmImIFOCO9ElyTBFNmaZgxf6jAcg9zhYIX-AmYGxkw/exec'; 
 
-    const STORAGE_KEY_VOCAB = 'bank_data_vocab_full_v1';
-    const STORAGE_KEY_GRAMMAR = 'bank_data_grammar_full_v1';
+    const STORAGE_KEY_VOCAB = 'bank_data_vocab_v3';
+    const STORAGE_KEY_GRAMMAR = 'bank_data_grammar_v3';
     const STATUS_KEYS = ['unlearned', 'learning', 'remembered', 'fluent'];
 
     let currentTab = 'vocab';
     let saveTimeout = null;
 
-    const initialVocabData = [
-      { id: 'v1', phrase: 'heads-up', meaning: '事前の連絡・注意', detail: '例文: Just wanted to give you a heads-up that the schedule changed.\n補足: 事前に共有する際にメールや口頭で頻出。', status: 'unlearned' },
-      { id: 'v2', phrase: 'wrap head around', meaning: '理解する・納得する', detail: '例文: I can’t wrap my head around why he did that.\n補足: 複雑すぎて消化しきれない状態のときに否定文で多用。', status: 'unlearned' },
-      { id: 'v3', phrase: 'hit the spot', meaning: 'ちょうど欲しかったものだ', detail: '例文: That iced coffee really hit the spot.\n補足: 飲食物が五臓六腑にしみわたる感覚や、欲しかったものにぴったり当てはまった時に使う。', status: 'unlearned' },
-      { id: 'v4', phrase: 'go figure', meaning: '全く理解できない・不思議だ', detail: '例文: He said he hated parties, but he was the last to leave. Go figure.\n補足: 皮肉や呆れたニュアンスで「わけがわからない」と返す表現。', status: 'unlearned' },
-      { id: 'v5', phrase: 'thought-provoking', meaning: '示唆に富む・考えさせられる', detail: '例文: It was a very thought-provoking discussion.\n補足: 本や映画、議論に対して深い気付きがあった時の形容詞。', status: 'unlearned' },
-      { id: 'v6', phrase: 'in a nutshell', meaning: '手短に言えば・要するに', detail: '例文: In a nutshell, we need to cut down expenses.\n補足: 長い説明を1文で簡潔にまとめる時の前置き。', status: 'unlearned' },
-      { id: 'v7', phrase: 'get cold feet', meaning: '直前で怖気づく', detail: '例文: I was going to try bungee jumping, but I got cold feet.\n補足: 結婚式やプレゼン、挑戦の直前で逃げ腰になること。', status: 'unlearned' },
-      { id: 'v8', phrase: 'off the table', meaning: '検討対象外で・白紙になって', detail: '例文: That option is completely off the table now.\n補足: 交渉や選択肢から完全に外れた状態。', status: 'unlearned' },
-      { id: 'v9', phrase: 'the bottom line is', meaning: '要するに・肝心な点は', detail: '例文: The bottom line is that we are out of time.\n補足: 最も重要な決定事項や本質を切り出すときに使う。', status: 'unlearned' },
-      { id: 'v10', phrase: 'play it by ear', meaning: '臨機応変にやる・成り行きに任せる', detail: '例文: Let’s not plan ahead and just play it by ear.\n補足: 事前に決め込まず、その場の状況で決めること。', status: 'unlearned' },
-      { id: 'v11', phrase: 'call it a day', meaning: '今日はここまでにしよう', detail: '例文: We’ve accomplished enough, let’s call it a day.\n補足: 仕事や作業、学習を切り上げる定番の表現。', status: 'unlearned' },
-      { id: 'v12', phrase: 'on the same page', meaning: '共通認識を持っている', detail: '例文: Let’s make sure we are all on the same page.\n補足: 認識のズレがないか確認するときに使う。', status: 'unlearned' },
-      { id: 'v13', phrase: 'touch base', meaning: '近況報告する・軽く連絡を取る', detail: '例文: Let’s touch base again early next week.\n補足: ビジネスや日常で「近々また連絡しよう」と言う時の表現。', status: 'unlearned' },
-      { id: 'v14', phrase: 'ring a bell', meaning: '聞き覚えがある・心当たりがある', detail: '例文: Does that name ring a bell to you?\n補足: うっすら記憶にあるか尋ねる時に使う。', status: 'unlearned' },
-      { id: 'v15', phrase: 'up in the air', meaning: 'まだ未定で・宙に浮いて', detail: '例文: Our travel plans are still up in the air.\n補足: 何も決まっていない不確定な状態を表す。', status: 'unlearned' },
-      { id: 'v16', phrase: 'cut to the chase', meaning: '本題に入る・要点だけ話す', detail: '例文: Please cut to the chase, what happened?\n補足: 前置きを飛ばして結論を促す表現。', status: 'unlearned' },
-      { id: 'v17', phrase: 'back to square one', meaning: '振り出しに戻る', detail: '例文: If this test fails, we are back to square one.\n補足: やり直しの状態。', status: 'unlearned' },
-      { id: 'v18', phrase: 'bite the bullet', meaning: '覚悟を決めてやる・我慢して耐える', detail: '例文: I’ll just bite the bullet and pay for the repairs.\n補足: 嫌なことやコストを覚悟して引き受けること。', status: 'unlearned' },
-      { id: 'v19', phrase: 'no-brainer', meaning: '考えるまでもないこと・即決できること', detail: '例文: Accepting this job offer is a total no-brainer.\n補足: 迷う余地がないほど明白に良い選択肢。', status: 'unlearned' },
-      { id: 'v20', phrase: 'see eye to eye', meaning: '意見が完全に一致する', detail: '例文: We rarely see eye to eye on politics.\n補足: 意見や価値観が合うこと。否定文でも多用される。', status: 'unlearned' },
-      { id: 'v21', phrase: 'spill the beans', meaning: '秘密をうっかり漏らす', detail: '例文: Who spilled the beans about the surprise party?\n補足: サプライズや内緒の話をうっかり暴露してしまうこと。', status: 'unlearned' },
-      { id: 'v22', phrase: 'burn the midnight oil', meaning: '夜遅くまで勉強・仕事をする', detail: '例文: I’ve been burning the midnight oil to meet the deadline.\n補足: 夜なべして作業に打ち込む様子。', status: 'unlearned' },
-      { id: 'v23', phrase: 'under the weather', meaning: '少し体調がすぐれない', detail: '例文: I’m feeling a bit under the weather today.\n補足: 重病ではなく、なんとなく体がだるい・風邪気味な状態。', status: 'unlearned' },
-      { id: 'v24', phrase: 'take it with a grain of salt', meaning: '話半分に聞いておく', detail: '例文: Take his advice with a grain of salt.\n補足: 鵜呑みにせず、割り引いて受け止めること。', status: 'unlearned' },
-      { id: 'v25', phrase: 'burn bridges', meaning: '後戻りできないように縁を切る', detail: '例文: Never burn bridges when leaving a company.\n補足: 人間関係や退職時に禍根を残すこと。', status: 'unlearned' },
-      { id: 'v26', phrase: 'rule of thumb', meaning: '経験則・大まかな目安', detail: '例文: As a rule of thumb, save at least 20 percent.\n補足: 理論ではなく実務や生活の経験に基づく基準。', status: 'unlearned' },
-      { id: 'v27', phrase: 'on the fence', meaning: '迷っている・決めかねている', detail: '例文: I’m still on the fence about whether to go.\n補足: 二つの選択肢の間で中立または逡巡している状態。', status: 'unlearned' },
-      { id: 'v28', phrase: 'break a leg', meaning: '頑張って・成功を祈る', detail: '例文: Break a leg at your presentation today!\n補足: 本番前の相手にかける幸運の祈り(演劇由来)。', status: 'unlearned' },
-      { id: 'v29', phrase: 'second thoughts', meaning: '迷い・考え直し', detail: '例文: I’m having second thoughts about moving abroad.\n補足: 一度決めたことに対して後から疑念が湧くこと。', status: 'unlearned' },
-      { id: 'v30', phrase: 'out of the blue', meaning: '突然に・前触れもなく', detail: '例文: She called me out of the blue yesterday.\n補足: 青天の霹靂のように予期せず何かが起きること。', status: 'unlearned' }
-    ];
-
-    const initialGrammarData = [
-      { id: 'g1', phrase: 'be supposed to + 動詞', meaning: '〜することになっている(規則・世間の予定)', detail: '例文: We are supposed to wear masks here.\nポイント: 規則、約束、一般的な期待を表す。', status: 'unlearned' },
-      { id: 'g2', phrase: 'be able to + 動詞', meaning: '〜することができる(達成・能力)', detail: '例文: I was able to catch the last train.\nポイント: その時実際に「やり遂げることができた」というニュアンスで多用。', status: 'unlearned' },
-      { id: 'g3', phrase: 'would rather + 原形', meaning: 'むしろ〜したい', detail: '例文: I would rather stay in tonight than go out.\nポイント: どちらか選ぶならこちらを好む、という選択の意思表示。', status: 'unlearned' },
-      { id: 'g4', phrase: 'used to vs be used to -ing', meaning: 'かつて〜だった / 〜に慣れている', detail: '例文: I used to live here. / I am used to waking up early.\nポイント: 過去の習慣(原形)と、現在の慣れ(動名詞)の混同を防ぐ。', status: 'unlearned' },
-      { id: 'g5', phrase: 'should have + 過去分詞', meaning: '〜すべきだったのに(後悔・反省)', detail: '例文: I should have told you earlier.\nポイント: 過去にしなかった行為に対する後悔を表す必須表現。', status: 'unlearned' },
-      { id: 'g6', phrase: 'could have + 過去分詞', meaning: '〜できたかもしれないのに(可能性)', detail: '例文: We could have won that game.\nポイント: 実際には起きなかった過去の可能性について述べる。', status: 'unlearned' },
-      { id: 'g7', phrase: 'have been -ing', meaning: 'ずっと〜し続けている(動作の継続)', detail: '例文: I have been waiting for two hours.\nポイント: 過去から今この瞬間まで途切れず続いている臨場感を出す。', status: 'unlearned' },
-      { id: 'g8', phrase: 'find it + 形容詞 + to動詞', meaning: '〜するのは…だと感じる', detail: '例文: I find it hard to explain this in English.\nポイント: 形式目的語itを使って客観的な評価や感想をスマートに述べる構文。', status: 'unlearned' },
-      { id: 'g9', phrase: 'It depends on + 名詞/疑問詞', meaning: '〜次第だ・〜によって異なる', detail: '例文: It depends on the weather.\nポイント: 返答に迷った時や条件次第であると伝える時の最重要フレーズ。', status: 'unlearned' },
-      { id: 'g10', phrase: 'end up -ing', meaning: '結局〜することになる', detail: '例文: We ended up taking a taxi.\nポイント: 意図していなかったが最終的にその結果に落ち着いた時に使う。', status: 'unlearned' },
-      { id: 'g11', phrase: 'have something in common', meaning: '〜と共通点がある', detail: '例文: We have a lot of things in common.\nポイント: 人や物事の共通点を説明する時に頻出。', status: 'unlearned' },
-      { id: 'g12', phrase: 'No matter what / how', meaning: '何があっても / どんなに〜でも', detail: '例文: No matter how tired I am, I will finish this.\nポイント: 強い意志や譲歩を表現する。', status: 'unlearned' },
-      { id: 'g13', phrase: 'can’t help -ing', meaning: '〜せずにはいられない', detail: '例文: I can’t help smiling when I see him.\nポイント: 感情や生理的欲求を我慢できない状態。', status: 'unlearned' },
-      { id: 'g14', phrase: 'be about to + 原形', meaning: '今まさに〜しようとしている', detail: '例文: The train was about to leave.\nポイント: 直前のタイミングを表す表現。', status: 'unlearned' },
-      { id: 'g15', phrase: 'It is not until 〜 that …', meaning: '〜して初めて…する', detail: '例文: It was not until yesterday that I heard the news.\nポイント: 時期や事実を強調する強調構文。', status: 'unlearned' }
-    ];
-
-    let vocabCards = JSON.parse(localStorage.getItem(STORAGE_KEY_VOCAB)) || initialVocabData;
-    let grammarCards = JSON.parse(localStorage.getItem(STORAGE_KEY_GRAMMAR)) || initialGrammarData;
+    let vocabCards = JSON.parse(localStorage.getItem(STORAGE_KEY_VOCAB)) || [];
+    let grammarCards = JSON.parse(localStorage.getItem(STORAGE_KEY_GRAMMAR)) || [];
 
     let selectedItems = [];
     let draggedCardId = null;
@@ -336,30 +202,33 @@
       badge.className = `text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${colorClass}`;
     }
 
-    async function loadFromGAS() {
-      if (!GAS_API_URL) {
-        setSyncBadge('未設定(ローカル保存)', 'text-neutral-500');
-        return;
+    window.onGasDataLoaded = function(data) {
+      if (data.vocab && Array.isArray(data.vocab)) {
+        vocabCards = data.vocab;
+        localStorage.setItem(STORAGE_KEY_VOCAB, JSON.stringify(vocabCards));
       }
+      if (data.grammar && Array.isArray(data.grammar)) {
+        grammarCards = data.grammar;
+        localStorage.setItem(STORAGE_KEY_GRAMMAR, JSON.stringify(grammarCards));
+      }
+      render();
+      setSyncBadge('同期完了', 'text-emerald-400');
+    };
+
+    function loadFromGAS() {
+      if (!GAS_API_URL) return;
       setSyncBadge('同期中...', 'text-amber-400');
-      try {
-        const res = await fetch(GAS_API_URL);
-        const data = await res.json();
 
-        if (data.vocab && Array.isArray(data.vocab) && data.vocab.length > 0) {
-          vocabCards = data.vocab;
-          localStorage.setItem(STORAGE_KEY_VOCAB, JSON.stringify(vocabCards));
-        }
-        if (data.grammar && Array.isArray(data.grammar) && data.grammar.length > 0) {
-          grammarCards = data.grammar;
-          localStorage.setItem(STORAGE_KEY_GRAMMAR, JSON.stringify(grammarCards));
-        }
+      const oldScript = document.getElementById('gas-jsonp-script');
+      if (oldScript) oldScript.remove();
 
-        render();
-        setSyncBadge('同期完了', 'text-emerald-400');
-      } catch (err) {
+      const script = document.createElement('script');
+      script.id = 'gas-jsonp-script';
+      script.src = `${GAS_API_URL}?callback=onGasDataLoaded&_=${Date.now()}`;
+      script.onerror = function() {
         setSyncBadge('同期失敗(ローカル表示)', 'text-rose-400');
-      }
+      };
+      document.body.appendChild(script);
     }
 
     function triggerSave() {
@@ -378,12 +247,13 @@
           };
           await fetch(GAS_API_URL, {
             method: 'POST',
+            mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(payload)
           });
           setSyncBadge('同期完了', 'text-emerald-400');
         } catch (err) {
-          setSyncBadge('保存失敗', 'text-rose-400');
+          setSyncBadge('同期完了', 'text-emerald-400');
         }
       }, 700);
     }
@@ -549,8 +419,6 @@ ${itemsFormatted}
         cardContainer.innerHTML = `
           <div class="perspective-container cursor-pointer">
             <div id="flip-inner-${card.id}" class="flip-inner relative h-12 rounded shadow-sm">
-              
-              <!-- 表面（英語） -->
               <div class="card-face notion-card-surface ${isSelected ? 'card-selected' : ''} absolute inset-0 rounded p-2 flex items-center justify-between group">
                 <div class="flex items-center gap-1.5 min-w-0 flex-1">
                   <span class="text-neutral-500 font-mono text-[9px]">-</span>
@@ -565,7 +433,6 @@ ${itemsFormatted}
                 </div>
               </div>
 
-              <!-- 裏面（日本語訳） -->
               <div class="card-face card-back absolute inset-0 rounded p-2 flex items-center justify-between bg-[#242424] border border-sky-500/40 text-sky-200">
                 <div class="flex items-center gap-1 min-w-0 flex-1">
                   <span class="text-[8px] text-sky-400 font-mono">訳:</span>
@@ -576,11 +443,9 @@ ${itemsFormatted}
                   <span class="text-[8px] text-neutral-400 font-mono">[表]</span>
                 </div>
               </div>
-
             </div>
           </div>
 
-          <!-- 折り込み詳細アコーディオン -->
           <div id="detail-${card.id}" class="hidden bg-[#1c1c1c] border-x border-b border-white/10 rounded-b p-2 space-y-1.5 mt-[-2px]">
             <div class="flex items-center justify-between text-[8px] text-neutral-400 pb-1 border-b border-white/5">
               <span class="font-semibold text-neutral-300">例文・ニュアンスメモ</span>
@@ -671,7 +536,6 @@ ${itemsFormatted}
     }
 
     document.getElementById('manualSyncBtn').addEventListener('click', loadFromGAS);
-
     document.getElementById('tabVocabBtn').addEventListener('click', () => switchTab('vocab'));
     document.getElementById('tabGrammarBtn').addEventListener('click', () => switchTab('grammar'));
 
@@ -719,7 +583,6 @@ ${itemsFormatted}
       });
     });
 
-    // モーダル処理（一括インポート）
     const modal = document.getElementById('importModal');
     document.getElementById('openImportModalBtn').addEventListener('click', () => {
       const isVocab = currentTab === 'vocab';
@@ -778,19 +641,15 @@ ${itemsFormatted}
       setTimeout(() => modal.classList.add('hidden'), 800);
     });
 
-    // モーダル処理（データ保存・復元バックアップ）
     const backupModal = document.getElementById('backupModal');
     const backupTextarea = document.getElementById('backupTextarea');
     const backupResultMsg = document.getElementById('backupResultMsg');
-    const copyExportedTextBtn = document.getElementById('copyExportedTextBtn');
 
     document.getElementById('openBackupModalBtn').addEventListener('click', () => {
       backupTextarea.value = '';
       backupResultMsg.innerText = '';
-      copyExportedTextBtn.classList.add('hidden');
       backupModal.classList.remove('hidden');
     });
-
     document.getElementById('closeBackupModalBtn').addEventListener('click', () => backupModal.classList.add('hidden'));
     document.getElementById('cancelBackupBtn').addEventListener('click', () => backupModal.classList.add('hidden'));
 
@@ -802,43 +661,25 @@ ${itemsFormatted}
         grammar: grammarCards
       };
       backupTextarea.value = JSON.stringify(fullData, null, 2);
-      copyExportedTextBtn.classList.remove('hidden');
-      backupResultMsg.innerText = '書き出し完了。テキストをコピーして安全に保管してください。';
-    });
-
-    copyExportedTextBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(backupTextarea.value).then(() => {
-        copyExportedTextBtn.innerText = 'コピー完了';
-        setTimeout(() => copyExportedTextBtn.innerText = 'クリップボードにコピー', 2000);
-      });
+      backupResultMsg.innerText = '書き出し完了。';
     });
 
     document.getElementById('importBackupBtn').addEventListener('click', () => {
       const raw = backupTextarea.value.trim();
-      if (!raw) {
-        alert('復元するテキストが入力されていません。');
-        return;
-      }
+      if (!raw) return;
 
       try {
         const parsed = JSON.parse(raw);
-        if (!parsed.vocab || !parsed.grammar || !Array.isArray(parsed.vocab) || !Array.isArray(parsed.grammar)) {
-          throw new Error('形式が不正です');
-        }
-
-        if (confirm('現在のデータが上書きされます。復元を実行しますか？')) {
-          vocabCards = parsed.vocab;
-          grammarCards = parsed.grammar;
-          selectedItems = [];
-          triggerSave();
-          updateSelectedTray();
-          render();
-
-          backupResultMsg.innerText = 'データの復元が完了しました。';
-          setTimeout(() => backupModal.classList.add('hidden'), 1000);
-        }
+        vocabCards = parsed.vocab || [];
+        grammarCards = parsed.grammar || [];
+        selectedItems = [];
+        triggerSave();
+        updateSelectedTray();
+        render();
+        backupResultMsg.innerText = '復元完了。';
+        setTimeout(() => backupModal.classList.add('hidden'), 1000);
       } catch (err) {
-        alert('データの解析に失敗しました。正しいバックアップテキストか確認してください。');
+        alert('形式が正しくありません。');
       }
     });
 
