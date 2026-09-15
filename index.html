@@ -43,7 +43,7 @@
             <span id="syncStatusBadge" class="text-[9px] font-mono text-neutral-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/5">未同期</span>
           </div>
           <div class="flex items-center gap-1.5 flex-wrap">
-            <button id="manualSyncBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">手動再同期</button>
+            <button id="manualSyncBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">スプレッドシート再取得</button>
             <button id="openImportModalBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-200 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">一括インポート</button>
             <button id="openBackupModalBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">データ保存・復元</button>
           </div>
@@ -178,15 +178,13 @@
   </div>
 
   <script>
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxBaY6I-bS64FJc0mzrOJsEGG8kPmImIFOCO9ElyTBFNmaZgxf6jAcg9zhYIX-AmYGxkw/exec'; 
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT0-cnOFW3ZWTJtm_cX3zxF8HHQCboM7rl3ITUfsm9_ei1QDAJ7YUoPikiPsOqKK-OkOE-bRixE452t/pub?gid=0&single=true&output=csv';
 
     const STORAGE_KEY_VOCAB = 'bank_data_vocab_v3';
     const STORAGE_KEY_GRAMMAR = 'bank_data_grammar_v3';
     const STATUS_KEYS = ['unlearned', 'learning', 'remembered', 'fluent'];
 
     let currentTab = 'vocab';
-    let saveTimeout = null;
-
     let vocabCards = JSON.parse(localStorage.getItem(STORAGE_KEY_VOCAB)) || [];
     let grammarCards = JSON.parse(localStorage.getItem(STORAGE_KEY_GRAMMAR)) || [];
 
@@ -200,60 +198,78 @@
       badge.className = `text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${colorClass}`;
     }
 
-    window.onGasDataLoaded = function(data) {
-      if (data && data.vocab && Array.isArray(data.vocab)) {
-        vocabCards = data.vocab;
-        localStorage.setItem(STORAGE_KEY_VOCAB, JSON.stringify(vocabCards));
+    function parseCSV(text) {
+      const p = '', row = [''], ret = [row];
+      let i = 0, r = 0, s = !0, l;
+      for (l of text) {
+        if ('"' === l) {
+          if (s && l === p) row[i] += l;
+          s = !s;
+        } else if (',' === l && s) {
+          l = row[++i] = '';
+        } else if ('\n' === l && s) {
+          if ('\r' === p) row[i] = row[i].slice(0, -1);
+          row = ret[++r] = [l = '']; i = 0;
+        } else row[i] += l;
+        p = l;
       }
-      if (data && data.grammar && Array.isArray(data.grammar)) {
-        grammarCards = data.grammar;
-        localStorage.setItem(STORAGE_KEY_GRAMMAR, JSON.stringify(grammarCards));
-      }
-      render();
-      setSyncBadge('同期完了', 'text-emerald-400');
-    };
-
-    function loadFromGAS() {
-      if (!GAS_API_URL) return;
-      setSyncBadge('同期中...', 'text-amber-400');
-
-      const oldScript = document.getElementById('gas-jsonp-script');
-      if (oldScript) oldScript.remove();
-
-      const script = document.createElement('script');
-      script.id = 'gas-jsonp-script';
-      script.src = `${GAS_API_URL}?callback=onGasDataLoaded&_=${Date.now()}`;
-      script.onerror = function() {
-        setSyncBadge('同期失敗(ローカル表示)', 'text-rose-400');
-      };
-      document.body.appendChild(script);
+      return ret;
     }
 
-    function triggerSave() {
+    async function loadFromSpreadsheet() {
+      setSyncBadge('シート取得中...', 'text-amber-400');
+      try {
+        const res = await fetch(`${CSV_URL}&_=${Date.now()}`);
+        if (!res.ok) throw new Error('Network error');
+        const csvText = await res.text();
+        const rows = parseCSV(csvText);
+
+        const newVocab = [];
+        const newGrammar = [];
+
+        // 2行目から読み込み (0行目はヘッダー)
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+          if (!r || r.length < 3) continue;
+          const type = (r[0] || '').trim().toLowerCase();
+          const item = {
+            id: String(r[1] || `${Date.now()}_${i}`),
+            phrase: String(r[2] || '').trim(),
+            meaning: String(r[3] || '').trim(),
+            detail: String(r[4] || '').trim(),
+            status: String(r[5] || 'unlearned').trim().toLowerCase()
+          };
+
+          if (!STATUS_KEYS.includes(item.status)) {
+            item.status = 'unlearned';
+          }
+
+          if (item.phrase) {
+            if (type === 'vocab') newVocab.push(item);
+            else if (type === 'grammar') newGrammar.push(item);
+          }
+        }
+
+        if (newVocab.length > 0 || newGrammar.length > 0) {
+          vocabCards = newVocab;
+          grammarCards = newGrammar;
+          localStorage.setItem(STORAGE_KEY_VOCAB, JSON.stringify(vocabCards));
+          localStorage.setItem(STORAGE_KEY_GRAMMAR, JSON.stringify(grammarCards));
+          render();
+          setSyncBadge(`同期完了 (${newVocab.length + newGrammar.length}件)`, 'text-emerald-400');
+        } else {
+          setSyncBadge('シートが空です', 'text-amber-400');
+        }
+      } catch (err) {
+        console.error(err);
+        setSyncBadge('ローカル保持中', 'text-neutral-400');
+        render();
+      }
+    }
+
+    function saveLocal() {
       localStorage.setItem(STORAGE_KEY_VOCAB, JSON.stringify(vocabCards));
       localStorage.setItem(STORAGE_KEY_GRAMMAR, JSON.stringify(grammarCards));
-
-      if (!GAS_API_URL) return;
-
-      setSyncBadge('保存中...', 'text-amber-400');
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(async () => {
-        try {
-          const payload = {
-            vocab: vocabCards,
-            grammar: grammarCards
-          };
-          await fetch(GAS_API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-          });
-          setSyncBadge('同期完了', 'text-emerald-400');
-        } catch (err) {
-          setSyncBadge('同期完了', 'text-emerald-400');
-        }
-      }, 700);
     }
 
     function getCurrentCards() {
@@ -266,7 +282,7 @@
       } else {
         grammarCards = newCards;
       }
-      triggerSave();
+      saveLocal();
     }
 
     function isDuplicate(phrase) {
@@ -534,7 +550,7 @@ ${itemsFormatted}
       });
     }
 
-    document.getElementById('manualSyncBtn').addEventListener('click', loadFromGAS);
+    document.getElementById('manualSyncBtn').addEventListener('click', loadFromSpreadsheet);
     document.getElementById('tabVocabBtn').addEventListener('click', () => switchTab('vocab'));
     document.getElementById('tabGrammarBtn').addEventListener('click', () => switchTab('grammar'));
 
@@ -672,7 +688,7 @@ ${itemsFormatted}
         vocabCards = parsed.vocab || [];
         grammarCards = parsed.grammar || [];
         selectedItems = [];
-        triggerSave();
+        saveLocal();
         updateSelectedTray();
         render();
         backupResultMsg.innerText = '復元完了。';
@@ -684,7 +700,7 @@ ${itemsFormatted}
 
     updateSelectedTray();
     render();
-    loadFromGAS();
+    loadFromSpreadsheet();
   </script>
 </body>
 </html>
