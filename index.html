@@ -35,7 +35,6 @@
   <div class="max-w-[1600px] mx-auto">
     <div class="flex flex-col lg:flex-row gap-4 items-start">
       
-      <!-- 左エリア：カンバンボード本体 -->
       <div class="flex-1 w-full min-w-0">
         <header class="mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div class="flex items-center gap-2">
@@ -109,7 +108,6 @@
         </div>
       </div>
 
-      <!-- 右エリア：練習トレイ -->
       <div class="w-full lg:w-80 shrink-0 bg-[#202020] border border-white/10 rounded-xl p-3 shadow-lg flex flex-col gap-2 sticky top-4">
         <div class="flex items-center justify-between border-b border-white/5 pb-2">
           <div class="flex items-center gap-1.5">
@@ -203,11 +201,11 @@
     }
 
     window.onGasDataLoaded = function(data) {
-      if (data.vocab && Array.isArray(data.vocab)) {
+      if (data && data.vocab && Array.isArray(data.vocab)) {
         vocabCards = data.vocab;
         localStorage.setItem(STORAGE_KEY_VOCAB, JSON.stringify(vocabCards));
       }
-      if (data.grammar && Array.isArray(data.grammar)) {
+      if (data && data.grammar && Array.isArray(data.grammar)) {
         grammarCards = data.grammar;
         localStorage.setItem(STORAGE_KEY_GRAMMAR, JSON.stringify(grammarCards));
       }
@@ -377,12 +375,7 @@ ${itemsFormatted}
       textarea.value = buildPrompt();
     }
 
-    function toggleAccordion(cardId) {
-      const detailEl = document.getElementById(`detail-${cardId}`);
-      const btnEl = document.getElementById(`toggle-btn-${cardId}`);
-      const btnBackEl = document.getElementById(`toggle-back-btn-${cardId}`);
-      const inner = document.getElementById(`flip-inner-${cardId}`);
-
+    function toggleAccordion(detailEl, btnEl, btnBackEl, inner) {
       if (detailEl.classList.contains('hidden')) {
         detailEl.classList.remove('hidden');
         if (btnEl) btnEl.innerText = '▲';
@@ -418,18 +411,18 @@ ${itemsFormatted}
 
         cardContainer.innerHTML = `
           <div class="perspective-container cursor-pointer">
-            <div id="flip-inner-${card.id}" class="flip-inner relative h-12 rounded shadow-sm">
+            <div class="flip-inner card-inner-box relative h-12 rounded shadow-sm">
               <div class="card-face notion-card-surface ${isSelected ? 'card-selected' : ''} absolute inset-0 rounded p-2 flex items-center justify-between group">
                 <div class="flex items-center gap-1.5 min-w-0 flex-1">
                   <span class="text-neutral-500 font-mono text-[9px]">-</span>
                   <span class="font-medium text-neutral-200 text-[10px] truncate tracking-tight">${card.phrase}</span>
                 </div>
                 <div class="flex items-center gap-1 ml-1">
-                  <button id="select-btn-${card.id}" title="トレイに追加" class="${isSelected ? 'bg-blue-600 text-white' : 'bg-white/5 hover:bg-white/10 text-neutral-300'} text-[8px] px-1 py-0.5 rounded font-medium transition">
+                  <button class="select-btn text-[8px] px-1 py-0.5 rounded font-medium transition ${isSelected ? 'bg-blue-600 text-white' : 'bg-white/5 hover:bg-white/10 text-neutral-300'}" title="トレイに追加">
                     ${isSelected ? '選択中' : '+選ぶ'}
                   </button>
-                  <button id="toggle-btn-${card.id}" title="詳細" class="text-neutral-400 hover:text-neutral-200 bg-white/5 hover:bg-white/10 text-[8px] w-4 h-4 rounded flex items-center justify-center transition">▼</button>
-                  <button title="削除" class="delete-btn opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-rose-400 text-xs px-1 transition leading-none">×</button>
+                  <button class="toggle-btn text-neutral-400 hover:text-neutral-200 bg-white/5 hover:bg-white/10 text-[8px] w-4 h-4 rounded flex items-center justify-center transition" title="詳細">▼</button>
+                  <button class="delete-btn opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-rose-400 text-xs px-1 transition leading-none" title="削除">×</button>
                 </div>
               </div>
 
@@ -439,50 +432,56 @@ ${itemsFormatted}
                   <span class="text-[10px] truncate font-normal">${card.meaning || '(訳なし)'}</span>
                 </div>
                 <div class="flex items-center gap-1 ml-1">
-                  <button id="toggle-back-btn-${card.id}" title="詳細" class="text-sky-300 hover:text-sky-100 bg-white/10 text-[8px] w-4 h-4 rounded flex items-center justify-center transition">▼</button>
+                  <button class="toggle-back-btn text-sky-300 hover:text-sky-100 bg-white/10 text-[8px] w-4 h-4 rounded flex items-center justify-center transition" title="詳細">▼</button>
                   <span class="text-[8px] text-neutral-400 font-mono">[表]</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div id="detail-${card.id}" class="hidden bg-[#1c1c1c] border-x border-b border-white/10 rounded-b p-2 space-y-1.5 mt-[-2px]">
+          <div class="detail-box hidden bg-[#1c1c1c] border-x border-b border-white/10 rounded-b p-2 space-y-1.5 mt-[-2px]">
             <div class="flex items-center justify-between text-[8px] text-neutral-400 pb-1 border-b border-white/5">
               <span class="font-semibold text-neutral-300">例文・ニュアンスメモ</span>
               <button class="close-accordion-btn text-neutral-500 hover:text-neutral-200 text-[8px] px-1 py-0.5 rounded bg-white/5">閉じる</button>
             </div>
-            <textarea id="textarea-${card.id}" rows="2" placeholder="例文や注意点を入力..." class="w-full bg-[#151515] border border-white/10 rounded p-1.5 text-[9px] text-neutral-300 focus:outline-none focus:border-blue-500 font-sans leading-relaxed resize-y">${card.detail || ''}</textarea>
+            <textarea rows="2" placeholder="例文や注意点を入力..." class="textarea-box w-full bg-[#151515] border border-white/10 rounded p-1.5 text-[9px] text-neutral-300 focus:outline-none focus:border-blue-500 font-sans leading-relaxed resize-y">${card.detail || ''}</textarea>
           </div>
         `;
 
-        const inner = cardContainer.querySelector(`#flip-inner-${card.id}`);
+        const inner = cardContainer.querySelector('.card-inner-box');
+        const detailEl = cardContainer.querySelector('.detail-box');
+        const btnEl = cardContainer.querySelector('.toggle-btn');
+        const btnBackEl = cardContainer.querySelector('.toggle-back-btn');
+        const selectBtn = cardContainer.querySelector('.select-btn');
+        const closeAccordionBtn = cardContainer.querySelector('.close-accordion-btn');
+        const deleteBtn = cardContainer.querySelector('.delete-btn');
+        const textarea = cardContainer.querySelector('.textarea-box');
+
         inner.addEventListener('click', (e) => {
           if (e.target.closest('button')) return;
           inner.classList.toggle('is-flipped');
         });
 
-        const selectBtn = cardContainer.querySelector(`#select-btn-${card.id}`);
         selectBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           toggleSelectItem(card);
         });
 
-        cardContainer.querySelector(`#toggle-btn-${card.id}`).addEventListener('click', (e) => {
+        btnEl.addEventListener('click', (e) => {
           e.stopPropagation();
-          toggleAccordion(card.id);
+          toggleAccordion(detailEl, btnEl, btnBackEl, inner);
         });
-        cardContainer.querySelector(`#toggle-back-btn-${card.id}`).addEventListener('click', (e) => {
+        btnBackEl.addEventListener('click', (e) => {
           e.stopPropagation();
-          toggleAccordion(card.id);
+          toggleAccordion(detailEl, btnEl, btnBackEl, inner);
         });
-        cardContainer.querySelector('.close-accordion-btn').addEventListener('click', (e) => {
+        closeAccordionBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          toggleAccordion(card.id);
+          toggleAccordion(detailEl, btnEl, btnBackEl, inner);
         });
 
-        cardContainer.querySelector('.delete-btn').addEventListener('click', (e) => removeCard(e, card.id));
+        deleteBtn.addEventListener('click', (e) => removeCard(e, card.id));
 
-        const textarea = cardContainer.querySelector(`#textarea-${card.id}`);
         textarea.addEventListener('input', (e) => {
           saveDetailText(card.id, e.target.value);
         });
