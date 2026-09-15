@@ -35,16 +35,16 @@
   <div class="max-w-[1600px] mx-auto">
     <div class="flex flex-col lg:flex-row gap-4 items-start">
       
+      <!-- カンバンボード -->
       <div class="flex-1 w-full min-w-0">
         <header class="mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div class="flex items-center gap-2">
             <span class="text-[10px] font-mono text-neutral-400">[Bank]</span>
             <h1 class="text-[11px] font-semibold text-neutral-100 tracking-tight" id="headerTitle">Vocabulary bank</h1>
-            <span id="syncStatusBadge" class="text-[9px] font-mono text-neutral-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/5">未同期</span>
+            <span id="dataCountBadge" class="text-[9px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-white/5 border border-white/5">0件</span>
           </div>
           <div class="flex items-center gap-1.5 flex-wrap">
-            <button id="manualSyncBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">スプレッドシート再取得</button>
-            <button id="openImportModalBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-200 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">一括インポート</button>
+            <button id="openImportModalBtn" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-2.5 py-1 rounded font-medium transition shadow-sm">スプシから一括貼り付け</button>
             <button id="openBackupModalBtn" class="bg-[#232323] hover:bg-[#2b2b2b] border border-white/10 text-neutral-300 text-[10px] px-2 py-1 rounded font-medium transition shadow-sm">データ保存・復元</button>
           </div>
         </header>
@@ -108,6 +108,7 @@
         </div>
       </div>
 
+      <!-- 練習トレイ -->
       <div class="w-full lg:w-80 shrink-0 bg-[#202020] border border-white/10 rounded-xl p-3 shadow-lg flex flex-col gap-2 sticky top-4">
         <div class="flex items-center justify-between border-b border-white/5 pb-2">
           <div class="flex items-center gap-1.5">
@@ -139,16 +140,20 @@
     </div>
   </div>
 
+  <!-- スプシ一括貼り付けモーダル -->
   <div id="importModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-[#202020] border border-white/10 rounded-xl max-w-lg w-full p-4 shadow-2xl">
+    <div class="bg-[#202020] border border-white/10 rounded-xl max-w-xl w-full p-4 shadow-2xl">
       <div class="flex items-center justify-between mb-2">
-        <h3 id="importModalTitle" class="text-[10px] font-semibold text-neutral-100">一括インポート</h3>
+        <h3 class="text-[11px] font-semibold text-neutral-100">スプレッドシートから一括貼り付け</h3>
         <button id="closeImportModalBtn" class="text-neutral-500 hover:text-neutral-300 text-xs px-1 leading-none">×</button>
       </div>
-      <p id="importModalDesc" class="text-[8px] text-neutral-400 mb-2 leading-relaxed">1行に「項目 / 日本語」の形式で貼り付けてください。</p>
-      <textarea id="importTextarea" rows="7" class="w-full bg-[#181818] border border-white/10 rounded p-2 text-[9px] text-neutral-200 focus:outline-none focus:border-blue-500 font-mono leading-relaxed resize-none mb-3"></textarea>
+      <p class="text-[9px] text-neutral-400 mb-2 leading-relaxed">
+        スプレッドシートのセル全体をコピーして、そのままここに貼り付けてください。<br>
+        1行目の見出し（type, id, phrase...）が入っていても自動でスキップされます。
+      </p>
+      <textarea id="importTextarea" rows="8" placeholder="スプレッドシートの表をコピーして貼り付け..." class="w-full bg-[#181818] border border-white/10 rounded p-2 text-[9px] text-neutral-200 focus:outline-none focus:border-blue-500 font-mono leading-relaxed resize-none mb-3"></textarea>
       <div class="flex items-center justify-between">
-        <span id="importResultMsg" class="text-[8px] text-emerald-400 font-medium"></span>
+        <span id="importResultMsg" class="text-[9px] text-emerald-400 font-medium"></span>
         <div class="flex items-center gap-2">
           <button id="cancelImportBtn" class="bg-white/5 hover:bg-white/10 text-neutral-300 text-[9px] px-2.5 py-1 rounded transition">キャンセル</button>
           <button id="runImportBtn" class="bg-blue-600 hover:bg-blue-500 text-white text-[9px] px-3 py-1 rounded font-medium transition">取り込む</button>
@@ -157,6 +162,7 @@
     </div>
   </div>
 
+  <!-- バックアップモーダル -->
   <div id="backupModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#202020] border border-white/10 rounded-xl max-w-lg w-full p-4 shadow-2xl">
       <div class="flex items-center justify-between mb-2">
@@ -178,8 +184,6 @@
   </div>
 
   <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT0-cnOFW3ZWTJtm_cX3zxF8HHQCboM7rl3ITUfsm9_ei1QDAJ7YUoPikiPsOqKK-OkOE-bRixE452t/pub?gid=0&single=true&output=csv';
-
     const STORAGE_KEY_VOCAB = 'bank_data_vocab_v3';
     const STORAGE_KEY_GRAMMAR = 'bank_data_grammar_v3';
     const STATUS_KEYS = ['unlearned', 'learning', 'remembered', 'fluent'];
@@ -191,85 +195,17 @@
     let selectedItems = [];
     let draggedCardId = null;
 
-    function setSyncBadge(text, colorClass) {
-      const badge = document.getElementById('syncStatusBadge');
-      if (!badge) return;
-      badge.innerText = text;
-      badge.className = `text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/5 ${colorClass}`;
-    }
-
-    function parseCSV(text) {
-      const p = '', row = [''], ret = [row];
-      let i = 0, r = 0, s = !0, l;
-      for (l of text) {
-        if ('"' === l) {
-          if (s && l === p) row[i] += l;
-          s = !s;
-        } else if (',' === l && s) {
-          l = row[++i] = '';
-        } else if ('\n' === l && s) {
-          if ('\r' === p) row[i] = row[i].slice(0, -1);
-          row = ret[++r] = [l = '']; i = 0;
-        } else row[i] += l;
-        p = l;
-      }
-      return ret;
-    }
-
-    async function loadFromSpreadsheet() {
-      setSyncBadge('シート取得中...', 'text-amber-400');
-      try {
-        const res = await fetch(`${CSV_URL}&_=${Date.now()}`);
-        if (!res.ok) throw new Error('Network error');
-        const csvText = await res.text();
-        const rows = parseCSV(csvText);
-
-        const newVocab = [];
-        const newGrammar = [];
-
-        // 2行目から読み込み (0行目はヘッダー)
-        for (let i = 1; i < rows.length; i++) {
-          const r = rows[i];
-          if (!r || r.length < 3) continue;
-          const type = (r[0] || '').trim().toLowerCase();
-          const item = {
-            id: String(r[1] || `${Date.now()}_${i}`),
-            phrase: String(r[2] || '').trim(),
-            meaning: String(r[3] || '').trim(),
-            detail: String(r[4] || '').trim(),
-            status: String(r[5] || 'unlearned').trim().toLowerCase()
-          };
-
-          if (!STATUS_KEYS.includes(item.status)) {
-            item.status = 'unlearned';
-          }
-
-          if (item.phrase) {
-            if (type === 'vocab') newVocab.push(item);
-            else if (type === 'grammar') newGrammar.push(item);
-          }
-        }
-
-        if (newVocab.length > 0 || newGrammar.length > 0) {
-          vocabCards = newVocab;
-          grammarCards = newGrammar;
-          localStorage.setItem(STORAGE_KEY_VOCAB, JSON.stringify(vocabCards));
-          localStorage.setItem(STORAGE_KEY_GRAMMAR, JSON.stringify(grammarCards));
-          render();
-          setSyncBadge(`同期完了 (${newVocab.length + newGrammar.length}件)`, 'text-emerald-400');
-        } else {
-          setSyncBadge('シートが空です', 'text-amber-400');
-        }
-      } catch (err) {
-        console.error(err);
-        setSyncBadge('ローカル保持中', 'text-neutral-400');
-        render();
-      }
-    }
-
     function saveLocal() {
       localStorage.setItem(STORAGE_KEY_VOCAB, JSON.stringify(vocabCards));
       localStorage.setItem(STORAGE_KEY_GRAMMAR, JSON.stringify(grammarCards));
+      updateBadge();
+    }
+
+    function updateBadge() {
+      const badge = document.getElementById('dataCountBadge');
+      if (badge) {
+        badge.innerText = `単語:${vocabCards.length}件 / 構文:${grammarCards.length}件`;
+      }
     }
 
     function getCurrentCards() {
@@ -285,9 +221,9 @@
       saveLocal();
     }
 
-    function isDuplicate(phrase) {
+    function isDuplicate(list, phrase) {
       const normalized = phrase.trim().toLowerCase();
-      return getCurrentCards().some(c => c.phrase.trim().toLowerCase() === normalized);
+      return list.some(c => c.phrase.trim().toLowerCase() === normalized);
     }
 
     function removeCard(e, id) {
@@ -523,6 +459,7 @@ ${itemsFormatted}
       });
 
       setupDropZones();
+      updateBadge();
     }
 
     function setupDropZones() {
@@ -550,7 +487,6 @@ ${itemsFormatted}
       });
     }
 
-    document.getElementById('manualSyncBtn').addEventListener('click', loadFromSpreadsheet);
     document.getElementById('tabVocabBtn').addEventListener('click', () => switchTab('vocab'));
     document.getElementById('tabGrammarBtn').addEventListener('click', () => switchTab('grammar'));
 
@@ -559,12 +495,12 @@ ${itemsFormatted}
       const meaning = document.getElementById('meaningInput').value.trim();
       if (!phrase) return;
 
-      if (isDuplicate(phrase)) {
+      const list = getCurrentCards();
+      if (isDuplicate(list, phrase)) {
         alert(`「${phrase}」はすでに登録されています。`);
         return;
       }
 
-      const list = getCurrentCards();
       list.push({ id: Date.now().toString(), phrase, meaning, detail: '', status: 'unlearned' });
       setCurrentCards(list);
 
@@ -598,10 +534,9 @@ ${itemsFormatted}
       });
     });
 
+    // スプシ貼り付け処理
     const modal = document.getElementById('importModal');
     document.getElementById('openImportModalBtn').addEventListener('click', () => {
-      const isVocab = currentTab === 'vocab';
-      document.getElementById('importModalTitle').innerText = `一括インポート(${isVocab ? '単語・フレーズ' : '文法・構文'})`;
       document.getElementById('importTextarea').value = '';
       document.getElementById('importResultMsg').innerText = '';
       modal.classList.remove('hidden');
@@ -613,49 +548,65 @@ ${itemsFormatted}
       const text = document.getElementById('importTextarea').value.trim();
       if (!text) return;
 
-      const lines = text.split('\n');
-      let addedCount = 0;
-      let skippedCount = 0;
-      const list = getCurrentCards();
+      const lines = text.split(/\r?\n/);
+      let vCount = 0;
+      let gCount = 0;
 
-      lines.forEach(line => {
-        const trimmed = line.trim();
-        if (!trimmed) return;
+      lines.forEach((line, idx) => {
+        if (!line.trim()) return;
+        // タブまたはカンマで分割
+        let cols = line.includes('\t') ? line.split('\t') : line.split(',');
+        cols = cols.map(c => c.trim().replace(/^"|"$/g, ''));
 
-        let parts = [];
-        if (trimmed.includes('/')) parts = trimmed.split('/');
-        else if (trimmed.includes('\t')) parts = trimmed.split('\t');
-        else if (trimmed.includes(' - ')) parts = trimmed.split(' - ');
-        else parts = [trimmed];
+        // 1行目のヘッダーはスキップ
+        if (cols[0].toLowerCase() === 'type' || cols[2] === 'phrase') return;
 
-        const phrase = (parts[0] || '').trim();
-        const meaning = (parts[1] || '').trim();
-        const detail = (parts[2] || '').trim();
+        let type = 'vocab';
+        let id = `${Date.now()}_${idx}`;
+        let phrase = '';
+        let meaning = '';
+        let detail = '';
+        let status = 'unlearned';
+
+        // スプシの列配置: type, id, phrase, meaning, detail, status
+        if (cols.length >= 4) {
+          type = cols[0].toLowerCase() === 'grammar' ? 'grammar' : 'vocab';
+          id = cols[1] || id;
+          phrase = cols[2] || '';
+          meaning = cols[3] || '';
+          detail = cols[4] || '';
+          status = STATUS_KEYS.includes(cols[5]) ? cols[5] : 'unlearned';
+        } else if (cols.length === 2) {
+          // フレーズ / 訳 だけの場合
+          phrase = cols[0];
+          meaning = cols[1];
+        }
 
         if (phrase) {
-          if (!isDuplicate(phrase)) {
-            list.push({
-              id: (Date.now() + Math.random()).toString(),
-              phrase,
-              meaning,
-              detail,
-              status: 'unlearned'
-            });
-            addedCount++;
+          const item = { id, phrase, meaning, detail, status };
+          if (type === 'grammar') {
+            if (!isDuplicate(grammarCards, phrase)) {
+              grammarCards.push(item);
+              gCount++;
+            }
           } else {
-            skippedCount++;
+            if (!isDuplicate(vocabCards, phrase)) {
+              vocabCards.push(item);
+              vCount++;
+            }
           }
         }
       });
 
-      setCurrentCards(list);
+      saveLocal();
       render();
 
       const msg = document.getElementById('importResultMsg');
-      msg.innerText = `${addedCount}件追加(重複${skippedCount}件スキップ)`;
-      setTimeout(() => modal.classList.add('hidden'), 800);
+      msg.innerText = `完了！単語 +${vCount}件 / 文法 +${gCount}件 を取り込みました`;
+      setTimeout(() => modal.classList.add('hidden'), 1200);
     });
 
+    // バックアップ機能
     const backupModal = document.getElementById('backupModal');
     const backupTextarea = document.getElementById('backupTextarea');
     const backupResultMsg = document.getElementById('backupResultMsg');
@@ -700,7 +651,6 @@ ${itemsFormatted}
 
     updateSelectedTray();
     render();
-    loadFromSpreadsheet();
   </script>
 </body>
 </html>
